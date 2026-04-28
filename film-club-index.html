@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Film Club Scores</title>
+  <style>
+    :root {
+      --bg: #101114;
+      --card: #1b1d22;
+      --text: #f5f5f5;
+      --muted: #b8bcc6;
+      --accent: #ffcc66;
+      --border: #333743;
+      --danger: #d94f4f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px 0 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      margin: 16px 0;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      font-size: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 12px;
+    }
+
+    input, select, textarea {
+      background: #111318;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 95px;
+      resize: vertical;
+    }
+
+    button {
+      margin-top: 18px;
+      background: var(--accent);
+      color: #111;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:active { transform: scale(0.99); }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .summary-box {
+      background: #111318;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .summary-number {
+      font-size: 1.7rem;
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    .vote {
+      border-top: 1px solid var(--border);
+      padding: 14px 0;
+    }
+
+    .vote:first-child { border-top: none; }
+
+    .vote-name {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .score-line {
+      color: var(--muted);
+      margin: 7px 0;
+      line-height: 1.5;
+    }
+
+    .comment {
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .watched-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .pill {
+      background: #111318;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 11px;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    .current-film {
+      color: var(--accent);
+      font-weight: bold;
+      line-height: 1.4;
+    }
+
+    @media (min-width: 650px) {
+      .button-row { grid-template-columns: 1fr 1fr; }
+      h1 { font-size: 2.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎬 Film Club</h1>
+      <div class="subtitle">Watch it. Score it. Argue about it politely.</div>
+    </header>
+
+    <section class="card">
+      <h2>This Week’s Film</h2>
+
+      <label for="filmName">Film name</label>
+      <input id="filmName" type="text" placeholder="e.g. The Grand Budapest Hotel" />
+
+      <label for="watchDate">Date watched</label>
+      <input id="watchDate" type="date" />
+
+      <button onclick="saveFilm()">Save Film Details</button>
+
+      <p id="currentFilm" class="current-film"></p>
+    </section>
+
+    <section class="card">
+      <h2>Submit Your Vote</h2>
+
+      <label for="voterName">Your name</label>
+      <input id="voterName" type="text" placeholder="e.g. Alex" />
+
+      <label for="overallScore">Overall score out of 5</label>
+      <select id="overallScore">
+        <option value="">Choose a score</option>
+        <option value="1">1 ⭐</option>
+        <option value="2">2 ⭐⭐</option>
+        <option value="3">3 ⭐⭐⭐</option>
+        <option value="4">4 ⭐⭐⭐⭐</option>
+        <option value="5">5 ⭐⭐⭐⭐⭐</option>
+      </select>
+
+      <label for="actingScore">Acting score out of 5</label>
+      <select id="actingScore">
+        <option value="">Choose a score</option>
+        <option value="1">1 ⭐</option>
+        <option value="2">2 ⭐⭐</option>
+        <option value="3">3 ⭐⭐⭐</option>
+        <option value="4">4 ⭐⭐⭐⭐</option>
+        <option value="5">5 ⭐⭐⭐⭐⭐</option>
+      </select>
+
+      <label for="plotScore">Plot score out of 5</label>
+      <select id="plotScore">
+        <option value="">Choose a score</option>
+        <option value="1">1 ⭐</option>
+        <option value="2">2 ⭐⭐</option>
+        <option value="3">3 ⭐⭐⭐</option>
+        <option value="4">4 ⭐⭐⭐⭐</option>
+        <option value="5">5 ⭐⭐⭐⭐⭐</option>
+      </select>
+
+      <label for="comments">Any comments?</label>
+      <textarea id="comments" placeholder="Best bit, worst bit, hot take..."></textarea>
+
+      <button onclick="submitVote()">Submit Vote</button>
+    </section>
+
+    <section class="card">
+      <h2>Results</h2>
+
+      <div class="summary-grid">
+        <div class="summary-box">
+          <div id="averageOverall" class="summary-number">-</div>
+          <div class="summary-label">Average overall</div>
+        </div>
+        <div class="summary-box">
+          <div id="totalWatchers" class="summary-number">0</div>
+          <div class="summary-label">People watched</div>
+        </div>
+        <div class="summary-box">
+          <div id="averageActing" class="summary-number">-</div>
+          <div class="summary-label">Average acting</div>
+        </div>
+        <div class="summary-box">
+          <div id="averagePlot" class="summary-number">-</div>
+          <div class="summary-label">Average plot</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Who’s Watched It?</h2>
+      <div id="watchedList" class="watched-list"></div>
+    </section>
+
+    <section class="card">
+      <h2>Votes & Comments</h2>
+      <div id="votesList"></div>
+
+      <div class="button-row">
+        <button onclick="downloadResults()">Download Results</button>
+        <button class="danger" onclick="clearVotes()">Clear Votes</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "filmClubVotesV2";
+    const FILM_KEY = "filmClubCurrentFilmV2";
+
+    function getFilm() {
+      return JSON.parse(localStorage.getItem(FILM_KEY)) || { name: "", date: "" };
+    }
+
+    function saveFilm() {
+      const name = document.getElementById("filmName").value.trim();
+      const date = document.getElementById("watchDate").value;
+
+      if (!name) {
+        alert("Please enter the film name.");
+        return;
+      }
+
+      localStorage.setItem(FILM_KEY, JSON.stringify({ name, date }));
+      render();
+    }
+
+    function getVotes() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    }
+
+    function saveVotes(votes) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(votes));
+    }
+
+    function submitVote() {
+      const film = getFilm();
+
+      if (!film.name) {
+        alert("Please save the film details first.");
+        return;
+      }
+
+      const voterName = document.getElementById("voterName").value.trim();
+      const overallScore = document.getElementById("overallScore").value;
+      const actingScore = document.getElementById("actingScore").value;
+      const plotScore = document.getElementById("plotScore").value;
+      const comments = document.getElementById("comments").value.trim();
+
+      if (!voterName || !overallScore || !actingScore || !plotScore) {
+        alert("Please enter your name and all three scores.");
+        return;
+      }
+
+      let votes = getVotes();
+
+      votes = votes.filter(v =>
+        !(v.filmName === film.name && v.voterName.toLowerCase() === voterName.toLowerCase())
+      );
+
+      votes.push({
+        filmName: film.name,
+        watchDate: film.date,
+        voterName,
+        overallScore: Number(overallScore),
+        actingScore: Number(actingScore),
+        plotScore: Number(plotScore),
+        comments,
+        submittedAt: new Date().toLocaleString()
+      });
+
+      saveVotes(votes);
+
+      document.getElementById("voterName").value = "";
+      document.getElementById("overallScore").value = "";
+      document.getElementById("actingScore").value = "";
+      document.getElementById("plotScore").value = "";
+      document.getElementById("comments").value = "";
+
+      render();
+    }
+
+    function average(items, field) {
+      if (items.length === 0) return "-";
+      const total = items.reduce((sum, item) => sum + item[field], 0);
+      return (total / items.length).toFixed(1);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatDate(dateValue) {
+      if (!dateValue) return "No date added";
+      const date = new Date(dateValue + "T00:00:00");
+      return date.toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      });
+    }
+
+    function render() {
+      const film = getFilm();
+      const allVotes = getVotes();
+      const votes = allVotes.filter(v => v.filmName === film.name);
+
+      document.getElementById("filmName").value = film.name || "";
+      document.getElementById("watchDate").value = film.date || "";
+
+      document.getElementById("currentFilm").innerHTML = film.name
+        ? `Current film: ${escapeHtml(film.name)}<br>Date watched: ${formatDate(film.date)}`
+        : "No film saved yet.";
+
+      document.getElementById("averageOverall").textContent = average(votes, "overallScore");
+      document.getElementById("averageActing").textContent = average(votes, "actingScore");
+      document.getElementById("averagePlot").textContent = average(votes, "plotScore");
+      document.getElementById("totalWatchers").textContent = votes.length;
+
+      const watchedList = document.getElementById("watchedList");
+      watchedList.innerHTML = "";
+
+      if (votes.length === 0) {
+        watchedList.innerHTML = '<div class="empty">No one has voted yet.</div>';
+      } else {
+        votes
+          .map(v => v.voterName)
+          .sort()
+          .forEach(name => {
+            watchedList.innerHTML += `<span class="pill">👀 ${escapeHtml(name)}</span>`;
+          });
+      }
+
+      const votesList = document.getElementById("votesList");
+      votesList.innerHTML = "";
+
+      if (votes.length === 0) {
+        votesList.innerHTML = '<div class="empty">No votes or comments yet.</div>';
+      } else {
+        votes
+          .slice()
+          .sort((a, b) => a.voterName.localeCompare(b.voterName))
+          .forEach(v => {
+            votesList.innerHTML += `
+              <div class="vote">
+                <div class="vote-name">${escapeHtml(v.voterName)}</div>
+                <div class="score-line">
+                  Overall: ${v.overallScore}/5 ⭐<br>
+                  Acting: ${v.actingScore}/5 ⭐<br>
+                  Plot: ${v.plotScore}/5 ⭐
+                </div>
+                <div class="comment">${escapeHtml(v.comments || "No comment added.")}</div>
+                <div class="score-line">Submitted: ${escapeHtml(v.submittedAt)}</div>
+              </div>
+            `;
+          });
+      }
+    }
+
+    function clearVotes() {
+      if (!confirm("Clear all votes for this film?")) return;
+      const film = getFilm();
+      const votes = getVotes().filter(v => v.filmName !== film.name);
+      saveVotes(votes);
+      render();
+    }
+
+    function downloadResults() {
+      const film = getFilm();
+      const votes = getVotes().filter(v => v.filmName === film.name);
+
+      if (!film.name) {
+        alert("No film saved yet.");
+        return;
+      }
+
+      let text = `Film Club Results\n`;
+      text += `Film: ${film.name}\n`;
+      text += `Date watched: ${formatDate(film.date)}\n\n`;
+
+      votes.forEach(v => {
+        text += `${v.voterName}\n`;
+        text += `Overall: ${v.overallScore}/5\n`;
+        text += `Acting: ${v.actingScore}/5\n`;
+        text += `Plot: ${v.plotScore}/5\n`;
+        text += `Comments: ${v.comments || "No comment"}\n\n`;
+      });
+
+      const blob = new Blob([text], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `${film.name.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_results.txt`;
+      link.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+    render();
+  </script>
+</body>
+</html>
